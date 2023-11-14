@@ -35,12 +35,20 @@ public class RegistrationController {
             model.addAttribute("passwordError", "Пароли не совпадают");
             return "registration";
         }
-        if (!userService.saveUser(userForm)) {
-            model.addAttribute("usernameError", "Пользователь с такой почтой уже зарегистрирован");
-            return "registration";
-        }
         if (userService.checkIfUserExistsByPhone(userForm)) {
             model.addAttribute("phoneNumberError", "Пользователь с таким номером телефона уже зарегистрирован");
+            return "registration";
+        }
+        if (!userService.numberValidator(userForm.getPhoneNumber())) {
+            model.addAttribute("phonePatternError", "Неверный формат номера");
+            return "registration";
+        }
+        if (!userService.validateEmail(userForm.getUsername())) {
+            model.addAttribute("emailPatterError", "Неверный формат почты");
+            return "registration";
+        }
+        if (!userService.saveUser(userForm)) {
+            model.addAttribute("usernameError", "Пользователь с такой почтой уже зарегистрирован");
             return "registration";
         }
 

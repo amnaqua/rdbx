@@ -4,7 +4,6 @@ import com.boots.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -30,8 +29,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .disable()
                 .authorizeRequests()
                     .antMatchers("/registration").not().fullyAuthenticated()
+                    .antMatchers("/resetPassword").not().fullyAuthenticated()
                     .antMatchers("/admin/**").hasRole("ADMIN")
                     .antMatchers("/manager/**").hasRole("MANAGER")
+                    .antMatchers("/purchase/**").hasRole("USER")
                     .antMatchers("/").permitAll()
                 .anyRequest().authenticated()
                 .and()

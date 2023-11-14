@@ -141,5 +141,4 @@ public class User implements UserDetails {
     public void  setVisitsCount(Integer visitsCount) {
         this.visitsCount = visitsCount;
     }
-
 }

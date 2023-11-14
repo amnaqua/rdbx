@@ -1,18 +1,26 @@
 package com.boots.service;
 
+import com.boots.entity.Purchase;
+import com.boots.entity.Smsc;
 import com.boots.entity.Role;
 import com.boots.entity.User;
+import com.boots.repository.PurchaseRepository;
 import com.boots.repository.RoleRepository;
 import com.boots.repository.UserRepository;
+import com.google.zxing.common.BitMatrix;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.google.zxing.*;
+import com.google.zxing.client.j2se.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +33,8 @@ public class UserService implements UserDetailsService {
     UserRepository userRepository;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    PurchaseRepository purchaseRepository;
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -43,10 +53,11 @@ public class UserService implements UserDetailsService {
         return userRepository.findByRoleName("ROLE_USER");
     }
 
-    public void addVisit(Long id) {
+    public void addVisit(Long id, Double amount) {
         User user = userRepository.findById(id).orElseThrow(IllegalAccessError::new);
         int visits = user.getVisitsCount();
         user.setVisitsCount(visits + 1);
+        user.setPurchaseSum(user.getPurchaseSum() + amount);
         userRepository.save(user);
     }
 
@@ -66,18 +77,46 @@ public class UserService implements UserDetailsService {
 
         userRepository.save(user);
 
+        try {
+            String qrCodeData = generateQRCode(user.getUsername());
+            System.out.println(qrCodeData);
+
+            Smsc smsc = new Smsc("login", "password");
+            String[] result = smsc.send_sms(user.getPhoneNumber(), qrCodeData, 0,
+                    "", "", 0, "", "");
+            System.out.println("ID сообщения: " + Arrays.toString(result));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return true;
     }
 
-//    public void saveUpdatedUser(User user) {
-//        User userFromDB = userRepository.findByUsername(user.getUsername());
-//
-//        user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-//
-//        userRepository.save(user);
-//    }
+    public User findUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    public boolean numberValidator(String phoneNumber) {
+        String cleanedPhoneNumber = phoneNumber.replaceAll("[\\s\\-()]", "");
+        String pattern = "^(\\+7|8)\\d{10}$";
+        return cleanedPhoneNumber.matches(pattern);
+    }
+
+    public boolean validateEmail(String email) {
+        String pattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return email.matches(pattern);
+    }
+
+    public String generateQRCode(String data) throws WriterException, IOException {
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(data, BarcodeFormat.QR_CODE, 200, 200);
+        ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+        byte[] pngData = pngOutputStream.toByteArray();
+        return Base64.getEncoder().encodeToString(pngData);
+    }
 
     public void addUser(User user, String roles) {
+
         String[] rolesArray = roles.split(";");
         Set<Role> roleSet = new HashSet<>();
         for (String role : rolesArray) {
@@ -93,19 +132,21 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid user ID: " + id));
 
-        Optional.ofNullable(username).filter(n -> !n.isEmpty()).ifPresent(user::setUsername);
+
+        Optional.ofNullable(username).filter(u -> !u.isEmpty()).ifPresent(user::setUsername);
         Optional.ofNullable(password).filter(p -> !p.isEmpty()).ifPresent(user::setPassword);
         Optional.ofNullable(phoneNumber).filter(pn -> !pn.isEmpty()).ifPresent(user::setPhoneNumber);
         Optional.ofNullable(purchaseSum).ifPresent(user::setPurchaseSum);
         Optional.ofNullable(visitCount).ifPresent(user::setVisitsCount);
 
         Optional.ofNullable(roles).filter(r -> !r.isEmpty()).ifPresent(rStr -> {
-            Set<Role> roleSet = Stream.of(rStr.split(";"))
-                    .map(role -> roleRepository.findFirstByName(role)
-                            .orElseThrow(() -> new IllegalStateException("Invalid role: " + role)))
-                    .collect(Collectors.toSet());
-            user.setRoles(roleSet);
-        });
+                    user.getRoles().clear();
+                    user.getRoles().addAll(roleRepository.findAll());
+                    user.getRoles().addAll(Stream.of(rStr.split(";"))
+                            .map(role -> roleRepository.findFirstByName(role)
+                                    .orElseThrow(() -> new IllegalStateException("Invalid role: " + role)))
+                            .collect(Collectors.toSet()));
+                });
         userRepository.save(user);
     }
 
@@ -120,8 +161,7 @@ public class UserService implements UserDetailsService {
         return userFromDB != null;
     }
 
-    public List<User> usergtList(Long idMin) {
-        return em.createQuery("SELECT u FROM User u WHERE u.id > :paramId", User.class)
-                .setParameter("paramId", idMin).getResultList();
+    public List<Purchase> purchasegtList() {
+        return purchaseRepository.findAll();
     }
 }
