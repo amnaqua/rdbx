@@ -9,6 +9,7 @@
   <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/table.css">
   <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/home_button.css">
   <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/input.css">
+  <link rel="stylesheet" type="text/css" href="${contextPath}/resources/css/forms.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="${contextPath}/resources/js/confirm.js"></script>
   <script src="${contextPath}/resources/js/input.js"></script>
@@ -44,8 +45,23 @@
   <form class="addVisit" action="${pageContext.request.contextPath}/manager/addVisit" method="post">
         <button type="submit">Add visit</button>
         <input type="input" name="userId" placeholder="User ID"/>
+        <input type="input" name="amount" placeholder="Amount"/>
         <input type="hidden" name="action" value="add"/>
   </form>
+  <table class="table">
+    <thead>
+      <th>ID</th>
+      <th>Amount</th>
+      <th>QR</th>
+    </thead>
+    <c:forEach items="${allPurchase}" var="purchase">
+      <tr>
+        <td>${purchase.id}</td>
+        <td>${purchase.amount}</td>
+        <td><img src="data:image/png;base64,${purchase.qrCode}" alt="QR Code"></td>
+      </tr>
+    </c:forEach>
+  </table>
 </div>
 </body>
 </html>

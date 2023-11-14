@@ -97,5 +97,12 @@ button[type="submit"] {
 a.home-button {
   display: block;
   text-align: center;
-  margin-top: 10px;
+  width: 60%;
+  font-size: 1em;
+  font-weight: bold;
+  outline: none;
+  border: none;
+  margin: 10px 47px;
+  background: #573b8a;
+  color: #fff;
 }

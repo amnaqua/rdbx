@@ -15,20 +15,27 @@
 <div>
   <div class="slider-thumb">
       <sec:authorize access="isAuthenticated()">
-          <h3>${pageContext.request.userPrincipal.name}</h3>
+        <h3>${pageContext.request.userPrincipal.name}</h3>
       </sec:authorize>
       <sec:authorize access="isAnonymous()">
-          <h3 style="display: none;"></h3>
+        <h3 style="display: none;"></h3>
       </sec:authorize>
       <sec:authorize access="isAnonymous()">
-          <h4><a href="/login" class="button">Войти</a></h4>
-          <h4><a href="/registration" class="button">Зарегистрироваться</a></h4>
+        <h4><a href="/login" class="button">Войти</a></h4>
+        <h4><a href="/registration" class="button">Зарегистрироваться</a></h4>
+      </sec:authorize>
+      <sec:authorize access="hasRole('ROLE_ADMIN')">
+        <h4><a href="/admin" class="button">Панель администратора</a></h4>
+      </sec:authorize>
+      <sec:authorize access="hasRole('ROLE_MANAGER')">
+        <h4><a href="/manager" class="button">Панель менеджера</a></h4>
+      </sec:authorize>
+      <sec:authorize access="hasRole('ROLE_USER')">
+        <h4><a href="/purchase" class="button">Покупка</a></h4>
       </sec:authorize>
       <sec:authorize access="isAuthenticated()">
-          <h4><a href="/logout" class="button">Выйти</a></h4>
+        <h4><a href="/logout" class="button">Выйти</a></h4>
       </sec:authorize>
-      <h4><a href="/admin" class="button">Панель администратора</a></h4>
-      <h4><a href="/manager" class="button">Панель менеджера</a></h4>
   </div>
 </div>
 </body>

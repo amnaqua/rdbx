@@ -21,8 +21,9 @@
     <form method="POST" action="/login">
       <input name="username" type="text" placeholder="Email" autofocus="true"/>
       <input name="password" type="password" placeholder="Password"/>
-      <button type="submit">Log In</button>
+      <button type="submit">Вход</button>
     </form>
+    <a href="/resetPassword" class="home-button">Забыл пароль</a>
     <a href="/" class="home-button">Главная</a>
   </div>
 </div>
