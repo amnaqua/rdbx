@@ -57,8 +57,17 @@ public class UserService implements UserDetailsService {
         User user = userRepository.findById(id).orElseThrow(IllegalAccessError::new);
         int visits = user.getVisitsCount();
         user.setVisitsCount(visits + 1);
-        user.setPurchaseSum(user.getPurchaseSum() + amount);
+        user.setPurchaseSum(user.getPurchaseSum() + amount - discount(user.getVisitsCount()));
         userRepository.save(user);
+    }
+
+    public Double discount(Integer visits) {
+        if (visits == 3 || visits == 8) {
+            return 5.0;
+        } else if (visits == 5 || visits == 10) {
+            return 10.0;
+        }
+        return 0.0;
     }
 
     public List<User> allUsers() {
@@ -81,7 +90,7 @@ public class UserService implements UserDetailsService {
             String qrCodeData = generateQRCode(user.getUsername());
             System.out.println(qrCodeData);
 
-            Smsc smsc = new Smsc("login", "password");
+            Smsc smsc = new Smsc("rdbx", "ea1c2o1m");
             String[] result = smsc.send_sms(user.getPhoneNumber(), qrCodeData, 0,
                     "", "", 0, "", "");
             System.out.println("ID сообщения: " + Arrays.toString(result));
