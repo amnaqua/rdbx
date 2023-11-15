@@ -47,9 +47,10 @@ In the UserService.java file, replace the values with yours </br>
 ## Used
 1. Main - Spring Boot, Spring Security, Spring Data JPA </br>
 2. Spring Boot Starter Mail - for working with emails </br>
-3. ZXing and Java UUID Generator for QR code generation </br>
-4. Tomcat and JSTL - servlets </br>
-5. SMSC API - for sms sends </br>
-6. MySQL - database </br>
-7. Apache Maven - for build </br>
-8. JSP, JS, CSS - front
+3. ZXing for QR code generation </br>
+4. Java UUID Generator for reset token generation    
+5. Tomcat and JSTL - servlets </br>
+6. SMSC API - for sms sends </br>
+7. MySQL - database </br>
+8. Apache Maven - for build </br>
+9. JSP, JS, CSS - front
